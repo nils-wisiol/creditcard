@@ -4,3 +4,7 @@
 /app/logs/*
 /vendor/
 /app/config/parameters.yml
+/.buildpath
+/.project
+/.settings/
+/composer.phar

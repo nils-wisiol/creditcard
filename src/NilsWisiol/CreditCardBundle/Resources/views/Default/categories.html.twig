@@ -1,0 +1,7 @@
+{% extends "NilsWisiolCreditCardBundle::Base.html.twig" %}
+
+{% block content %}
+	<h2>Categories</h2>
+	
+ {% include 'NilsWisiolCreditCardBundle:Default:categoriesList.html.twig' with { cat: categories } %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "NilsWisiolCreditCardBundle::Base.html.twig" %}
+
+{% block content %}
+	<h2>Import</h2>
+	<form action="{{ path('nils_wisiol_credit_card_import') }}" method="post" {{ form_enctype(form) }}>
+    {{ form_widget(form) }}
+
+    <input type="submit" />
+	</form>
+{% endblock %}

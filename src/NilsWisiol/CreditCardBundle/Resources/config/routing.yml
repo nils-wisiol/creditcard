@@ -1,0 +1,27 @@
+nils_wisiol_credit_card_homepage:
+    pattern:  /
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:index }
+
+nils_wisiol_credit_card_import:
+    pattern: /import
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:import }
+    
+nils_wisiol_credit_card_categories:
+    pattern: /cat
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:categories }   
+    
+nils_wisiol_credit_card_import_detail:
+    pattern: /import/{documentId}
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:importDetail }
+ 
+nils_wisiol_credit_card_cat_detail:
+    pattern: /cat/{categoryId}
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:categoryDetail }
+    
+nils_wisiol_credit_card_cat_change:
+    pattern: /cat/change/
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:categoryChange }
+    
+nils_wisiol_credit_card_import_undo:
+    pattern: /import/undo/{documentId}
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:importUndo }

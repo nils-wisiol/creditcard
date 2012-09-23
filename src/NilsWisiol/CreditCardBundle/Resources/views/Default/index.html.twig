@@ -1,0 +1,121 @@
+{% extends "NilsWisiolCreditCardBundle::Base.html.twig" %}
+
+{% block content %}
+	<div class="modal hide fade" id="modalSelectCategory" role="dialog" aria-labelledby="modalSelectCategoryLabel" aria-hidden="true">
+	  <div class="modal-header">
+	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	    <h3 id="modalSelectCategoryLabel">Choose Category</h3>
+	  </div>
+	  <div class="modal-body">
+	    <p>Please select category</p>
+	    <form>
+	    	<select id="categoryId" name="categoryId">
+	    		{% for c in categories %}
+	    			<option id="option{{ c.getId }}" value="{{ c.getId }}">{{ c }}</option>
+	    		{% endfor %}
+	    	</select>
+	    	Note <input type="text" name="entryNote" id="entryNote">
+	    </form>
+	  </div>
+	  <div class="modal-footer">
+	    <a href="#" class="btn" data-dismiss="modal">Close</a>
+	    <a href="#" class="btn btn-primary save">Save changes</a>
+	  </div>
+	</div>
+	
+	<table class="table table-striped" style="width: 100%;">
+		<thead>
+		  <tr>
+		  	<th>account</th>
+		    <th>date</th>
+		    <th>amount</th>
+		    <th>amount org</th>
+		    <th>1,75% amount</th>
+		    <th>desc</th>
+		    <th>import</th>
+		    <th>category</th>
+		  </tr>
+		</thead>
+		{% set sums = {'USD': 0, 'EUR': 0} %}
+		{% for e in entries %}
+			<tr>
+				<td>{{ e.getAccount }}</td>
+				<td>{{ e.getDate | date('d.m.Y') }}</td>
+				<td style="text-align: right;">{{ e.getAmount }}&nbsp;{{ e.getCur }}</td>
+				<td style="text-align: right;">{{ e.getAmountOrg }}&nbsp;{{ e.getCurOrg }}</td>
+				<td style="text-align: right;">{{ (e.getAmount * 0.0175) | number_format(2) }}&nbsp;{{ e.getCur }}</td>
+				<td>{{ e.getDesc }}<br/><small id="note{{ e.getId }}">{{ e.getNote }}</small></td>
+				<td><a href="{{ path('nils_wisiol_credit_card_import_detail', {documentId: e.getDocument.getId}) }}">{{ e.getDocument }}</a></td>
+				<td>
+					<span id="category{{ e.getId }}">
+						{% if e.getCategory != null %}
+							<a href="{{ path('nils_wisiol_credit_card_cat_detail', {categoryId: e.getCategory.getId}) }}">
+								{{ e.getCategory }}
+							</a>
+						{% else %}
+							<i>
+								none
+							</i>
+						{% endif %}
+					</span>
+					<a href="#" class="selectCategory selectCategory{{ e.getId }}" data-entry="{{ e.getId }}" data-category="{% if e.getCategory != null %}{{ e.getCategory.getId }}{% else %}null{% endif %}">...</a>
+				</td>
+			</tr>
+			{% if e.getCur == 'USD' %}
+				{% set sums = sums|merge({'USD': sums['USD'] + e.getAmount}) %}
+			{% elseif e.getCur == 'EUR' %}
+				{% set sums = sums|merge({'EUR': sums['EUR'] + e.getAmount}) %}
+			{% endif %}
+		{% endfor %}
+		<tfoot>
+			<tr>
+				<th></th>
+				<th></th>
+				<th style="text-align: right;">
+					{% for cur in sums|keys %}
+						{{ sums[cur] | number_format(2) }}&nbsp;{{ cur }}<br/>
+					{% endfor %}
+				</th>
+				<th></th>
+				<th></th>
+				<th></th>
+				<th></th>
+				<th></th>
+			</tr>
+		</tfoot>
+	</table>
+{% endblock %}
+
+{% block scripts %}
+	{{ parent() }}
+	<script>
+		$('.selectCategory').on('click',function() {
+			var entry = $(this).attr('data-entry');
+			var category = $(this).attr('data-category');
+			
+			$('#modalSelectCategory .save').unbind();
+			$('#modalSelectCategory .save').on('click',function() {
+				$.ajax({
+					type: "POST",
+					url: "{{ path('nils_wisiol_credit_card_cat_change') }}",
+					data: { entryId: entry, categoryId: $('#modalSelectCategory #categoryId').val(), note: $('#modalSelectCategory #entryNote').val() },
+					error: function(jqXHR, textStatus, errorThrown) {
+							alert("error: " + textStatus + " " + errorThrown);
+						},
+					success: function(data, textStatus, jqXHR) {
+							$('#category' + entry).html($('#modalSelectCategory #option' + $('#modalSelectCategory #categoryId').val()).html());
+							$('#note' + entry).html($('#modalSelectCategory #entryNote').val());
+							$('.selectCategory' + entry).attr('data-category',$('#modalSelectCategory #categoryId').val());
+							$('#modalSelectCategory').modal('hide');
+						}
+				})
+			});
+
+			$('#modalSelectCategory #categoryId').val($('.selectCategory' + entry).attr('data-category'));
+			$('#modalSelectCategory #entryNote').val($('#note' + entry).html());
+			
+			$('#modalSelectCategory').modal();
+			return false;
+		});
+	</script>
+{% endblock %}

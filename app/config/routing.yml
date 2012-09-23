@@ -1,3 +1,7 @@
+nils_wisiol_credit_card:
+    resource: "@NilsWisiolCreditCardBundle/Resources/config/routing.yml"
+    prefix:   /cc/
+
 # Internal routing configuration to handle ESI
 #_internal:
 #    resource: "@FrameworkBundle/Resources/config/routing/internal.xml"

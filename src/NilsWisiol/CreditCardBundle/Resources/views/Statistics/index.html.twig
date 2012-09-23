@@ -1,0 +1,22 @@
+{% extends "NilsWisiolCreditCardBundle::Base.html.twig" %}
+
+{% block content %}
+	<table>
+		<thead>
+		  <tr>
+		  	<td>account</td>
+		    <td>date</td>
+		    <td>amount</td>
+		    <td>desc</td>
+		  </tr>
+		</thead>
+		{% for e in entries %}
+			<tr>
+				<td>{{ e.getAccount }}</td>
+				<td>{{ e.getDate | date('d.M.Y') }}</td>
+				<td>{{ e.getAmount }}</td>
+				<td>{{ e.getDesc }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

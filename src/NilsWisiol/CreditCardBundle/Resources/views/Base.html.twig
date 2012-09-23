@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<link href="{{ asset('bundles/creditcard/css/bootstrap.min.css') }}" rel="stylesheet">
+  </head>
+  <body style="padding-top: 60px;">
+		<div class="navbar navbar-fixed-top navbar-inverse">
+		  <div class="navbar-inner">
+		  	<div class="container">
+			    <a class="brand" href="{{ path('nils_wisiol_credit_card_homepage') }}">credit card</a>
+			    <ul class="nav">
+		    		<li><a href="{{ path('nils_wisiol_credit_card_homepage') }}">all entries</a></li>
+		    		<li><a href="{{ path('nils_wisiol_credit_card_import') }}">import</a></li>
+		    		<li><a href="{{ path('nils_wisiol_credit_card_categories') }}">categories</a></li>
+			    </ul>
+		    </div>
+		  </div>
+		</div>
+    {% block content %}
+    {% endblock %}
+    {% block scripts %}
+	    <script src="http://code.jquery.com/jquery-latest.js"></script>
+	    <script src="{{ asset('bundles/creditcard/js/bootstrap.min.js') }}"></script>
+    {% endblock %}
+  </body>
+</html>
