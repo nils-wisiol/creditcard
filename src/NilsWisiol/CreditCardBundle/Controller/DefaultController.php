@@ -131,6 +131,8 @@ class DefaultController extends Controller {
 			
 			$em->persist($e);
 			
+			$this->checkForDuplicates($e->getHash());
+			
 		}
 	}
 	
@@ -155,6 +157,14 @@ class DefaultController extends Controller {
 			$em->persist($e);
 				
 		}		
+	}
+	
+	protected function checkForDuplicates($hash) {
+		$em = $this->getDoctrine()->getEntityManager();
+		$duplicates = $em->getRepository("NilsWisiol\CreditCardBundle\Entity\Entry")->findBy(array('hash' => $hash));
+		if ($duplicates > 0)
+			throw new \Exception("Duplicate detected: " . $duplicates[0]->getDate()->format('d.m.Y') . " " . $duplicates[0]->getDesc() . " " . $duplicates[0]->getAmount() . " " . $duplicates[0]->getCur());
+		return;
 	}
 	
 	private function stripQuotationMarks($subject) {

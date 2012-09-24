@@ -6,6 +6,7 @@ use Doctrine\Common\Persistence\PersistentObject;
 
 /**
  * @ORM\Entity
+ * @ORM\HasLifecycleCallbacks
  *
  */
 class Entry extends Entity {
@@ -63,6 +64,11 @@ class Entry extends Entity {
 	protected $idAcc;
 	
 	/**
+	 * @ORM\Column(type="string",length=32)
+	 */
+	protected $hash;
+	
+	/**
 	 * @ORM\ManyToOne(targetEntity="Account")
 	 * @var Account
 	 */
@@ -79,5 +85,13 @@ class Entry extends Entity {
 	 * @var Category
 	 */
 	protected $category;
+	
+	/**
+	 * @ORM\PreUpdate
+	 * @ORM\PrePersist
+	 */
+	public function generateHash() {
+		$this->hash = md5($this->desc.$this->amountOrg.$this->date->format('d.m.Y'));
+	}	
 	
 }
