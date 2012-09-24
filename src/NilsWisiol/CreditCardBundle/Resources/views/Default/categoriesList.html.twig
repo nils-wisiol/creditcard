@@ -1,6 +1,10 @@
 <ul>
 	{% for c in categories %}
 	  <li><a href="{{ path('nils_wisiol_credit_card_cat_detail', {categoryId: c.getId}) }}">{{ c }}</a>
+	    {% set total = c.getTotal %}
+	    {% for cur in total|keys %}
+	    	{{ total[cur] | number_format(2) }}&nbsp;{{ cur }} 
+	    {% endfor %}
 	  	{% if c.getChildren | length > 0 %}
 	  		{% include 'NilsWisiolCreditCardBundle:Default:categoriesList.html.twig' with { 'categories': c.getChildren } %}
 	  	{% endif %}

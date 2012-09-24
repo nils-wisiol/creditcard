@@ -42,6 +42,29 @@ class Category extends Entity {
 	 */
 	protected $entries;
 	
+	function getDescendants($result = null) {
+		if ($result == null)
+			$result = array();
+		
+		$result = array_merge($result, $this->entries->toArray());
+		
+		foreach($this->children as $c) {
+			$result = $c->getDescendants($result);
+		}
+		
+		return $result;
+	}
+	
+	function getTotal() {
+		$total = array();
+		foreach($this->getDescendants() as $d) {
+			if (!isset($total[$d->getCur()]))
+				$total[$d->getCur()] = 0;
+			$total[$d->getCur()] += $d->getAmount();
+		}
+		return $total;
+	}
+	
 	function __toString() {
 		if ($this->parent == null) {
 			return $this->name;

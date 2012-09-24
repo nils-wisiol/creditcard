@@ -1,0 +1,16 @@
+{% extends "NilsWisiolCreditCardBundle:Default:index.html.twig" %}
+
+{% block content %}
+	<h2>import {{ category }}</h2>
+	{% if category.getParent != null %}
+		Parent <a href="{{ path('nils_wisiol_credit_card_cat_detail', { categoryId: category.getParent.getId }) }}">{{ category.getParent }}</a>
+	{% else %}
+		Root Category.
+	{% endif %}
+	<ul>
+	  {% for c in category.getChildren %}
+	  	<li><a href="{{ path('nils_wisiol_credit_card_cat_detail', { categoryId: c.getId }) }}">{{ c }}</a>
+	  {% endfor %}
+	</ul>
+	{{ parent() }}
+{% endblock %}

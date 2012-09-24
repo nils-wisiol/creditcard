@@ -76,7 +76,7 @@ class DefaultController extends Controller {
 		$em = $this->getDoctrine()->getEntityManager();
 		$category = $em->find("NilsWisiol\CreditCardBundle\Entity\Category", $categoryId);
 		
-		return $this->render('NilsWisiolCreditCardBundle:Default:index.html.twig', array('entries' => $category->getEntries(), 'categories' => $this->getCategories()));
+		return $this->render('NilsWisiolCreditCardBundle:Default:categoryDetails.html.twig', array('entries' => $category->getDescendants(), 'categories' => $this->getCategories(), 'category' => $category));
 	}
 	
 	public function categoriesAction() {
