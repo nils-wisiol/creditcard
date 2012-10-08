@@ -1,0 +1,7 @@
+{% extends "NilsWisiolCreditCardBundle:Default:index.html.twig" %}
+
+{% block content %}
+	<h2>Account {{ account }}</h2>
+	Created {{ account.getCreated | date('j.n.y H:i:s') }}
+	{{ parent() }}
+{% endblock %}

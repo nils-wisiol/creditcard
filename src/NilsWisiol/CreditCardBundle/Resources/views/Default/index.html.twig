@@ -39,7 +39,7 @@
 		{% set sums = {'USD': 0, 'EUR': 0} %}
 		{% for e in entries %}
 			<tr>
-				<td>{{ e.getAccount }}</td>
+				<td><a href="{{ path('nils_wisiol_credit_card_acc_detail', { accountId: e.getAccount.getId }) }}">{{ e.getAccount }}</a></td>
 				<td>{{ e.getDate | date('d.m.Y') }}</td>
 				<td style="text-align: right;">{{ e.getAmount }}&nbsp;{{ e.getCur }}</td>
 				<td style="text-align: right;">{{ e.getAmountOrg }}&nbsp;{{ e.getCurOrg }}</td>

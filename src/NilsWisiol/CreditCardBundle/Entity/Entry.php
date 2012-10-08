@@ -69,6 +69,11 @@ class Entry extends Entity {
 	protected $hash;
 	
 	/**
+	 * @ORM\Column(type="string",length=1024)
+	 */
+	protected $hashinv;	
+	
+	/**
 	 * @ORM\ManyToOne(targetEntity="Account")
 	 * @var Account
 	 */
@@ -91,7 +96,8 @@ class Entry extends Entity {
 	 * @ORM\PrePersist
 	 */
 	public function generateHash() {
-		$this->hash = md5($this->desc.$this->amountOrg.$this->date->format('d.m.Y'));
+		$this->hashinv = strtoupper($this->desc).number_format(floor($this->amount*100),0,"","").$this->date->format('d.m.Y');
+		$this->hash = md5($this->hashinv);
 	}	
 	
 }

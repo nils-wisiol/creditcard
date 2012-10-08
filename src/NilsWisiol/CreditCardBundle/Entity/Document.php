@@ -38,6 +38,11 @@ class Document extends Entity
 	public $format;
 	
 	/**
+	 * @ORM\Column(type="integer")
+	 */
+	public $duplicates = 0;	
+	
+	/**
 	 * @ORM\ManyToOne(targetEntity="Account")
 	 * @var Account
 	 */

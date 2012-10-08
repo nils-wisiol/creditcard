@@ -2,7 +2,7 @@
 
 {% block content %}
 	<h2>import {{ import }}</h2>
-	Imported {{ import.getCreated | date('j.n.y H:i:s') }}
+	Imported {{ import.getCreated | date('j.n.y H:i:s') }}, skipped {{ import.getDuplicates }} duplicates.
 	<a href="{{ path('nils_wisiol_credit_card_import_undo', { 'documentId': import.getId }) }}" data-role="button" class="btn btn-danger">undo import</a>
 	{{ parent() }}
 {% endblock %}

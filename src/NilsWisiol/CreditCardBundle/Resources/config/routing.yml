@@ -25,3 +25,12 @@ nils_wisiol_credit_card_cat_change:
 nils_wisiol_credit_card_import_undo:
     pattern: /import/undo/{documentId}
     defaults: { _controller: NilsWisiolCreditCardBundle:Default:importUndo }
+
+nils_wisiol_credit_card_acc_detail:
+    pattern: /acc/{accountId}
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:accountDetail }
+
+test:
+    pattern: /hash
+    defaults: { _controller: NilsWisiolCreditCardBundle:Default:hash }
+      

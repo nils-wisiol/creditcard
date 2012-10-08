@@ -11,7 +11,7 @@ class DefaultController extends Controller {
 	public function indexAction() {
 		$em = $this->getDoctrine()->getEntityManager();
 		
-		$entries = $em->getRepository('NilsWisiol\CreditCardBundle\Entity\Entry')->findBy(array(), array('date' => 'asc'));
+		$entries = $em->getRepository('NilsWisiol\CreditCardBundle\Entity\Entry')->findBy(array(), array('date' => 'desc'));
 		
 		return $this->render('NilsWisiolCreditCardBundle:Default:index.html.twig', array('entries' => $entries, 'categories' => $this->getCategories()));
 	}
@@ -47,8 +47,9 @@ class DefaultController extends Controller {
             $this->doImport($document, $input);
             $em->persist($document);
             $em->flush();
-
-            return $this->redirect($this->generateUrl('nils_wisiol_credit_card_import_detail', array('documentId' => $document->getId())));
+					
+            return new Response("<html><head></head><body>ok</body></html>");
+            //return $this->redirect($this->generateUrl('nils_wisiol_credit_card_import_detail', array('documentId' => $document->getId())));
         }
     }
 
@@ -58,7 +59,7 @@ class DefaultController extends Controller {
 	public function importDetailAction($documentId) {
 		$em = $this->getDoctrine()->getEntityManager();
 		$document = $em->find("NilsWisiol\CreditCardBundle\Entity\Document", $documentId);
-		$entries = $em->getRepository("NilsWisiol\CreditCardBundle\Entity\Entry")->findBy(array('document' => $document->getId()), array('date' => 'asc'));
+		$entries = $em->getRepository("NilsWisiol\CreditCardBundle\Entity\Entry")->findBy(array('document' => $document->getId()), array('date' => 'desc'));
 		
 		return $this->render('NilsWisiolCreditCardBundle:Default:importDetails.html.twig', array('entries' => $entries, 'categories' => $this->getCategories(), 'import' => $document));
 	}
@@ -76,7 +77,10 @@ class DefaultController extends Controller {
 		$em = $this->getDoctrine()->getEntityManager();
 		$category = $em->find("NilsWisiol\CreditCardBundle\Entity\Category", $categoryId);
 		
-		return $this->render('NilsWisiolCreditCardBundle:Default:categoryDetails.html.twig', array('entries' => $category->getDescendants(), 'categories' => $this->getCategories(), 'category' => $category));
+		$entries = $category->getDescendants();
+		usort($entries, function($a, $b) { return ($a->getDate()->format('U') > $b->getDate()->format('U') ? -1 : 1); });
+		
+		return $this->render('NilsWisiolCreditCardBundle:Default:categoryDetails.html.twig', array('entries' => $entries, 'categories' => $this->getCategories(), 'category' => $category));
 	}
 	
 	public function categoriesAction() {
@@ -96,6 +100,14 @@ class DefaultController extends Controller {
 		return new Response();
 	}
 	
+	public function accountDetailAction($accountId) {
+		$em = $this->getDoctrine()->getEntityManager();
+		$account = $em->find("NilsWisiol\CreditCardBundle\Entity\Account", $accountId);
+		$entries = $em->getRepository("NilsWisiol\CreditCardBundle\Entity\Entry")->findBy(array('account' => $account->getId()), array('date' => 'desc'));
+		
+		return $this->render('NilsWisiolCreditCardBundle:Default:accountDetails.html.twig', array('entries' => $entries, 'categories' => $this->getCategories(), 'account' => $account));
+	}
+	
 	protected function doImport($document, $input) {
 		if ($document->getFormat() == 'dkb') {
 			$this->doImportDKBCSV($document, $input);
@@ -108,6 +120,7 @@ class DefaultController extends Controller {
 	
 	protected function doImportDKBCSV($document, $input) {
 		$em = $this->getDoctrine()->getEntityManager();
+		$dup = 0;
 		
 		for($i=8;$i<count($input);$i++) {
 			
@@ -128,16 +141,23 @@ class DefaultController extends Controller {
 			$e->setCur("EUR");
 			$e->setAccount($document->getAccount());
 			$e->setDocument($document);
-			
-			$em->persist($e);
-			
-			$this->checkForDuplicates($e->getHash());
+			$e->generateHash();
+
+			if ($this->checkForDuplicates($e->getHash())) {
+				$em->persist($e);
+			} else {
+				$dup++;
+				continue;
+			}
 			
 		}
+		$document->setDuplicates($dup);
+		
 	}
 	
 	protected function doImportBOACSV($document, $input) {
 		$em = $this->getDoctrine()->getEntityManager();
+		$dup = 0;
 		
 		for($i=7;$i<count($input);$i++) {
 			if (trim($input[$i]) == "")
@@ -153,18 +173,28 @@ class DefaultController extends Controller {
 			$e->setCur("USD");
 			$e->setAccount($document->getAccount());
 			$e->setDocument($document);
+			$e->generateHash();
 				
-			$em->persist($e);
+			if ($this->checkForDuplicates($e->getHash())) {
+				$em->persist($e);
+			} else {
+				$dup++;
+				continue;
+			}
 				
 		}		
+		
+		$document->setDuplicates($dup);
+		
+		return;
 	}
 	
 	protected function checkForDuplicates($hash) {
 		$em = $this->getDoctrine()->getEntityManager();
 		$duplicates = $em->getRepository("NilsWisiol\CreditCardBundle\Entity\Entry")->findBy(array('hash' => $hash));
-		if ($duplicates > 0)
-			throw new \Exception("Duplicate detected: " . $duplicates[0]->getDate()->format('d.m.Y') . " " . $duplicates[0]->getDesc() . " " . $duplicates[0]->getAmount() . " " . $duplicates[0]->getCur());
-		return;
+		if (count($duplicates) > 0)
+			return false;
+		return true;
 	}
 	
 	private function stripQuotationMarks($subject) {
@@ -184,6 +214,15 @@ class DefaultController extends Controller {
 	
 	protected function getCategories() {
 		return $this->getDoctrine()->getEntityManager()->getRepository("NilsWisiol\CreditCardBundle\Entity\Category")->findAll();
+	}
+	
+	public function hashAction() {
+		$em = $this->getDoctrine()->getEntityManager();
+		$entries = $em->getRepository("NilsWisiol\CreditCardBundle\Entity\Entry")->findAll();		
+		foreach($entries as $e)
+			$e->generateHash();
+		$em->flush();
+		return new Response("ok");
 	}
 		
 }
